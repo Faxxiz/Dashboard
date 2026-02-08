@@ -24,8 +24,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useTheme } from '../providers/ThemeProvider';
+import { Monitor, Moon, Sun } from 'lucide-react';
 
 function HomePage() {
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const selectedYear = searchParams.get('year');
@@ -111,8 +114,51 @@ function HomePage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
-          <h1 className="text-5xl font-bold mb-2">🏎️ F1 Dashboard</h1>
-          <p className="text-muted-foreground">Formula 1 Racing Statistics & Data</p>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-5xl font-bold mb-2">🏎️ F1 Dashboard</h1>
+              <p className="text-muted-foreground">Formula 1 Racing Statistics & Data</p>
+            </div>
+            <div
+              className="inline-flex items-center gap-1 rounded-full border bg-background p-1"
+              role="group"
+              aria-label="Theme preference"
+            >
+              <button
+                type="button"
+                onClick={() => setTheme('system')}
+                aria-pressed={theme === 'system'}
+                title={`System (${resolvedTheme})`}
+                className={`rounded-full p-2 transition ${
+                  theme === 'system' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                }`}
+              >
+                <Monitor className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setTheme('light')}
+                aria-pressed={theme === 'light'}
+                title="Light"
+                className={`rounded-full p-2 transition ${
+                  theme === 'light' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                }`}
+              >
+                <Sun className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setTheme('dark')}
+                aria-pressed={theme === 'dark'}
+                title="Dark"
+                className={`rounded-full p-2 transition ${
+                  theme === 'dark' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                }`}
+              >
+                <Moon className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </header>
 
         {/* Year Selector - Always visible */}
