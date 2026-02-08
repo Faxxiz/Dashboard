@@ -1,8 +1,8 @@
-import { HttpModule } from "@nestjs/axios";
-import { Module } from "@nestjs/common";
-import { SportsController } from "./sports/sports.controller";
-import { SportsService } from "./sports/sports.service";
-import { JolpicaProvider } from "./providers/jolpica/jolpica.provider";
+import { HttpModule } from '@nestjs/axios';
+import { Module } from '@nestjs/common';
+import { SportsController } from './sports/sports.controller';
+import { SportsService } from './sports/sports.service';
+import { JolpicaProvider } from './providers/jolpica/jolpica.provider';
 
 @Module({
   imports: [HttpModule],

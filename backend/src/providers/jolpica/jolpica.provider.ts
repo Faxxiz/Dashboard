@@ -1,7 +1,7 @@
 /**
  * Jolpica F1 API Provider
  * Maps Jolpica (Ergast-compatible) API responses to our domain models
- * 
+ *
  * Jolpica API: http://api.jolpi.ca/ergast/f1/
  * No API key required - free and open
  * Jolpica is the successor to the deprecated Ergast API
@@ -12,7 +12,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, catchError } from 'rxjs';
 import { HttpException } from '@nestjs/common';
 import { SportsProvider } from '../sports-provider.interface';
-import { Season, Event, Competitor, Standing, SportType } from '../../domain/sport';
+import { Season, Event, Competitor, Standing, RaceResult, SportType } from '../../domain/sport';
 
 // Jolpica API types (Ergast-compatible response structure)
 interface JolpicaSeason {
@@ -34,6 +34,22 @@ interface JolpicaRace {
   };
   date: string;
   time?: string;
+  Results?: Array<{
+    number: string;
+    position: string;
+    positionText: string;
+    points: string;
+    Driver: JolpicaDriver;
+    Constructor: {
+      constructorId: string;
+      name: string;
+    };
+    laps: string;
+    status: string;
+    Time?: {
+      time: string;
+    };
+  }>;
 }
 
 interface JolpicaDriver {
@@ -118,14 +134,16 @@ export class JolpicaProvider implements SportsProvider {
       // Jolpica has a proper seasons endpoint that returns SeasonTable.Seasons
       const seasons = response.data.MRData.SeasonTable?.Seasons || [];
 
-      return seasons.map((season: JolpicaSeason) => ({
-        id: season.season,
-        year: parseInt(season.season, 10),
-        name: `F1 ${season.season} Season`,
-        startDate: `${season.season}-01-01`,
-        endDate: `${season.season}-12-31`,
-        sport: 'f1' as SportType,
-      })).reverse(); // Most recent first
+      return seasons
+        .map((season: JolpicaSeason) => ({
+          id: season.season,
+          year: parseInt(season.season, 10),
+          name: `F1 ${season.season} Season`,
+          startDate: `${season.season}-01-01`,
+          endDate: `${season.season}-12-31`,
+          sport: 'f1' as SportType,
+        }))
+        .reverse(); // Most recent first
     } catch (error) {
       console.error('Error in getSeasons:', error);
       throw error;
@@ -172,15 +190,14 @@ export class JolpicaProvider implements SportsProvider {
     try {
       const response = await firstValueFrom(
         this.httpService
-          .get<JolpicaResponse<JolpicaStanding>>(
-            `${this.baseUrl}/${seasonId}/driverStandings.json`,
-          )
+          .get<JolpicaResponse<JolpicaStanding>>(`${this.baseUrl}/${seasonId}/driverStandings.json`)
           .pipe(
             catchError((e) => {
               console.error('Jolpica API Error (getStandings):', e.response?.data || e.message);
               throw new HttpException(
                 {
-                  message: e.response?.data?.message || 'Failed to fetch standings from Jolpica API',
+                  message:
+                    e.response?.data?.message || 'Failed to fetch standings from Jolpica API',
                   status: e.response?.status || 500,
                 },
                 e.response?.status || 500,
@@ -189,8 +206,7 @@ export class JolpicaProvider implements SportsProvider {
           ),
       );
 
-      const standingsList =
-        response.data.MRData.StandingsTable?.StandingsLists?.[0];
+      const standingsList = response.data.MRData.StandingsTable?.StandingsLists?.[0];
       const driverStandings = standingsList?.DriverStandings || [];
 
       return driverStandings.map((standing: JolpicaStanding) => ({
@@ -218,7 +234,8 @@ export class JolpicaProvider implements SportsProvider {
               console.error('Jolpica API Error (getCompetitor):', e.response?.data || e.message);
               throw new HttpException(
                 {
-                  message: e.response?.data?.message || 'Failed to fetch competitor from Jolpica API',
+                  message:
+                    e.response?.data?.message || 'Failed to fetch competitor from Jolpica API',
                   status: e.response?.status || 500,
                 },
                 e.response?.status || 500,
@@ -249,7 +266,7 @@ export class JolpicaProvider implements SportsProvider {
     try {
       // eventId format: "2023-1" (season-round)
       const [seasonId, round] = eventId.split('-');
-      
+
       const response = await firstValueFrom(
         this.httpService
           .get<JolpicaResponse<JolpicaRace>>(`${this.baseUrl}/${seasonId}/${round}/races.json`)
@@ -286,5 +303,53 @@ export class JolpicaProvider implements SportsProvider {
       throw error;
     }
   }
-}
 
+  async getRaceResults(eventId: string): Promise<RaceResult[]> {
+    try {
+      // eventId format: "2023-1" (season-round)
+      const [seasonId, round] = eventId.split('-');
+
+      const response = await firstValueFrom(
+        this.httpService
+          .get<JolpicaResponse<JolpicaRace>>(`${this.baseUrl}/${seasonId}/${round}/results.json`)
+          .pipe(
+            catchError((e) => {
+              console.error('Jolpica API Error (getRaceResults):', e.response?.data || e.message);
+              throw new HttpException(
+                {
+                  message:
+                    e.response?.data?.message || 'Failed to fetch race results from Jolpica API',
+                  status: e.response?.status || 500,
+                },
+                e.response?.status || 500,
+              );
+            }),
+          ),
+      );
+
+      const race = response.data.MRData.RaceTable?.Races?.[0];
+      if (!race || !race.Results) {
+        return [];
+      }
+
+      return race.Results.map((result) => ({
+        position: parseInt(result.position, 10),
+        positionText: result.positionText,
+        points: parseFloat(result.points),
+        driverId: result.Driver.driverId,
+        driverName: `${result.Driver.givenName} ${result.Driver.familyName}`,
+        driverNumber: result.Driver.permanentNumber
+          ? parseInt(result.Driver.permanentNumber, 10)
+          : undefined,
+        constructorId: result.Constructor.constructorId,
+        constructorName: result.Constructor.name,
+        laps: parseInt(result.laps, 10),
+        status: result.status,
+        time: result.Time?.time,
+      }));
+    } catch (error) {
+      console.error('Error in getRaceResults:', error);
+      throw error;
+    }
+  }
+}

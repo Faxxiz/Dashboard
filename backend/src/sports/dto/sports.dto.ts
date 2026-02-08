@@ -4,7 +4,7 @@
  * Provider-agnostic by design
  */
 
-import { Season, Event, Competitor, Standing } from '../../domain/sport';
+import { Season, Event, Competitor, Standing, RaceResult } from '../../domain/sport';
 
 export class SeasonDto implements Season {
   id: string;
@@ -46,3 +46,16 @@ export class StandingDto implements Standing {
   draws?: number;
 }
 
+export class RaceResultDto implements RaceResult {
+  position: number;
+  positionText: string;
+  points: number;
+  driverId: string;
+  driverName: string;
+  driverNumber?: number;
+  constructorId: string;
+  constructorName: string;
+  laps?: number;
+  status: string;
+  time?: string;
+}

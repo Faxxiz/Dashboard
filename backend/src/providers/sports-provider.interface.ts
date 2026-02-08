@@ -4,7 +4,7 @@
  * This allows us to swap providers without changing the rest of the codebase
  */
 
-import { Season, Event, Competitor, Standing, SportType } from '../domain/sport';
+import { Season, Event, Competitor, Standing, RaceResult, SportType } from '../domain/sport';
 
 export interface SportsProvider {
   /**
@@ -36,5 +36,9 @@ export interface SportsProvider {
    * Get a specific event by ID
    */
   getEvent(eventId: string): Promise<Event>;
-}
 
+  /**
+   * Get race results for a specific event
+   */
+  getRaceResults(eventId: string): Promise<RaceResult[]>;
+}

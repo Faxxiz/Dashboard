@@ -7,7 +7,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SportsProvider } from '../providers/sports-provider.interface';
 import { JolpicaProvider } from '../providers/jolpica/jolpica.provider';
-import { Season, Event, Competitor, Standing, SportType } from '../domain/sport';
+import { Season, Event, Competitor, Standing, RaceResult, SportType } from '../domain/sport';
 
 @Injectable()
 export class SportsService {
@@ -17,7 +17,7 @@ export class SportsService {
     // Register all available providers
     this.providers = new Map();
     this.providers.set('f1', jolpicaProvider);
-    
+
     // Future providers can be added here:
     // this.providers.set('football', apiFootballProvider);
     // this.providers.set('basketball', nbaProvider);
@@ -75,10 +75,17 @@ export class SportsService {
   }
 
   /**
+   * Get race results for a specific event
+   */
+  async getRaceResults(sport: SportType, eventId: string): Promise<RaceResult[]> {
+    const provider = this.getProvider(sport);
+    return provider.getRaceResults(eventId);
+  }
+
+  /**
    * Get all supported sports
    */
   getSupportedSports(): SportType[] {
     return Array.from(this.providers.keys());
   }
 }
-

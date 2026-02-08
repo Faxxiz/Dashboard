@@ -3,13 +3,7 @@
  * Transforms all exceptions into user-friendly error responses
  */
 
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch()
@@ -89,4 +83,3 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
   }
 }
-

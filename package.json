@@ -6,10 +6,13 @@
   "scripts": {
     "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"pnpm -C backend run start:dev\" \"pnpm -C frontend run dev\"",
     "build": "pnpm --filter \"./*\" run build",
-    "install:all": "pnpm install"
+    "install:all": "pnpm install",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "prettier": "^3.7.4"
   },
   "engines": {
     "node": ">=18.0.0",

@@ -1,0 +1,14 @@
+node_modules
+dist
+build
+.next
+.turbo
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*.log
+coverage
+.cache
+public
+# shadcn components usually shouldn't be formatted if they are generated
+frontend/src/components/ui

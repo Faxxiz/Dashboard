@@ -71,7 +71,7 @@ All providers must implement this interface, ensuring they return the same shape
 @Injectable()
 export class JolpicaProvider implements SportsProvider {
   readonly sport: SportType = 'f1';
-  
+
   async getSeasons(): Promise<Season[]> {
     // Fetch from Jolpica API (Ergast-compatible)
     // Map Jolpica response to our domain model
@@ -81,6 +81,7 @@ export class JolpicaProvider implements SportsProvider {
 ```
 
 Each provider:
+
 - Fetches data from its specific API
 - Maps the API response to our domain models
 - Returns normalized data
@@ -92,7 +93,7 @@ Each provider:
 @Injectable()
 export class SportsService {
   private providers: Map<SportType, SportsProvider>;
-  
+
   async getSeasons(sport: SportType): Promise<Season[]> {
     const provider = this.getProvider(sport);
     return provider.getSeasons();
@@ -101,6 +102,7 @@ export class SportsService {
 ```
 
 The service:
+
 - Routes requests to the correct provider
 - Doesn't know or care about API implementation details
 - Can easily swap providers
@@ -119,6 +121,7 @@ export class SportsController {
 ```
 
 Controllers:
+
 - Expose RESTful endpoints
 - Never expose provider-specific data
 - Frontend never knows which provider is used
@@ -126,12 +129,14 @@ Controllers:
 ## API Endpoints
 
 ### Get Supported Sports
+
 ```
 GET /sports
 Response: { sports: ['f1', 'football', ...] }
 ```
 
 ### Get Seasons
+
 ```
 GET /sports/:sport/seasons
 Example: GET /sports/f1/seasons
@@ -139,6 +144,7 @@ Response: Season[]
 ```
 
 ### Get Events (Races/Matches)
+
 ```
 GET /sports/:sport/seasons/:seasonId/events
 Example: GET /sports/f1/seasons/2023/events
@@ -146,6 +152,7 @@ Response: Event[]
 ```
 
 ### Get Standings
+
 ```
 GET /sports/:sport/seasons/:seasonId/standings
 Example: GET /sports/f1/seasons/2023/standings
@@ -153,6 +160,7 @@ Response: Standing[]
 ```
 
 ### Get Competitor
+
 ```
 GET /sports/:sport/competitors/:id
 Example: GET /sports/f1/competitors/alonso
@@ -160,6 +168,7 @@ Response: Competitor
 ```
 
 ### Get Event
+
 ```
 GET /sports/:sport/events/:eventId
 Example: GET /sports/f1/events/2023-1
@@ -169,6 +178,7 @@ Response: Event
 ## Adding a New Provider
 
 1. **Create provider class** implementing `SportsProvider`:
+
    ```typescript
    @Injectable()
    export class ApiFootballProvider implements SportsProvider {
@@ -178,12 +188,13 @@ Response: Event
    ```
 
 2. **Register in `app.module.ts`**:
+
    ```typescript
    providers: [
      SportsService,
      JolpicaProvider,
-     ApiFootballProvider,  // Add here
-   ]
+     ApiFootballProvider, // Add here
+   ];
    ```
 
 3. **Register in `sports.service.ts`**:
@@ -211,7 +222,7 @@ That's it! The frontend can now use `/sports/football/seasons` without any chang
 ## Migration from Old Structure
 
 The old `formula-one/` folder can be removed. All functionality is now in:
+
 - `providers/jolpica/` - Provider implementation
 - `sports/` - Service and controller
 - `domain/` - Domain models
-

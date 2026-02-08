@@ -3,16 +3,10 @@
  * Frontend never knows which provider is being used
  */
 
-import {
-  Controller,
-  Get,
-  Param,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { SportsService } from './sports.service';
 import { SportType } from '../domain/sport';
-import { SeasonDto, EventDto, CompetitorDto, StandingDto } from './dto/sports.dto';
+import { SeasonDto, EventDto, CompetitorDto, StandingDto, RaceResultDto } from './dto/sports.dto';
 
 @Controller('sports')
 export class SportsController {
@@ -91,6 +85,19 @@ export class SportsController {
   }
 
   /**
+   * Get race results for a specific event
+   * GET /sports/:sport/events/:eventId/results
+   */
+  @Get(':sport/events/:eventId/results')
+  async getRaceResults(
+    @Param('sport') sport: string,
+    @Param('eventId') eventId: string,
+  ): Promise<RaceResultDto[]> {
+    this.validateSport(sport);
+    return await this.sportsService.getRaceResults(sport as SportType, eventId);
+  }
+
+  /**
    * Validate that the sport is supported
    */
   private validateSport(sport: string): void {
@@ -105,4 +112,3 @@ export class SportsController {
     }
   }
 }
-

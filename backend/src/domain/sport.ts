@@ -47,3 +47,16 @@ export interface Standing {
   draws?: number;
 }
 
+export interface RaceResult {
+  position: number;
+  positionText: string;
+  points: number;
+  driverId: string;
+  driverName: string;
+  driverNumber?: number;
+  constructorId: string;
+  constructorName: string;
+  laps?: number;
+  status: string;
+  time?: string;
+}
