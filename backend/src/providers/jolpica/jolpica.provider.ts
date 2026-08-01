@@ -2,7 +2,7 @@
  * Jolpica F1 API Provider
  * Maps Jolpica (Ergast-compatible) API responses to our domain models
  *
- * Jolpica API: http://api.jolpi.ca/ergast/f1/
+ * Jolpica API: https://api.jolpi.ca/ergast/f1/
  * No API key required - free and open
  * Jolpica is the successor to the deprecated Ergast API
  */
@@ -107,7 +107,7 @@ interface JolpicaResponse<T> {
 @Injectable()
 export class JolpicaProvider implements SportsProvider {
   readonly sport: SportType = 'f1';
-  private readonly baseUrl = 'http://api.jolpi.ca/ergast/f1';
+  private readonly baseUrl = 'https://api.jolpi.ca/ergast/f1';
 
   constructor(private readonly httpService: HttpService) {}
 

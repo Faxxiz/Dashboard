@@ -2,6 +2,14 @@ packages:
   - frontend
   - backend
 
+allowBuilds:
+  '@nestjs/core': true
+  '@swc/core': true
+  esbuild: true
+
+minimumReleaseAgeExclude:
+  - postcss@8.5.17
+
 onlyBuiltDependencies:
   - '@nestjs/core'
   - '@swc/core'

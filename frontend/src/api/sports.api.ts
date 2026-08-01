@@ -21,6 +21,14 @@ interface ApiErrorResponse {
   timestamp: string;
 }
 
+function throwApiError(error: unknown, fallback: string): never {
+  if (error instanceof AxiosError && error.response?.data) {
+    const apiError = error.response.data as ApiErrorResponse;
+    throw new Error(apiError.message || fallback, { cause: error });
+  }
+  throw error;
+}
+
 export interface Event {
   id: string;
   name: string;
@@ -53,11 +61,7 @@ export async function getSeasons(sport: string = 'f1'): Promise<Season[]> {
     const response = await api.get<Season[]>(`/sports/${sport}/seasons`);
     return response.data;
   } catch (error: unknown) {
-    if (error instanceof AxiosError && error.response?.data) {
-      const apiError = error.response.data as ApiErrorResponse;
-      throw new Error(apiError.message || 'Failed to fetch seasons');
-    }
-    throw error;
+    throwApiError(error, 'Failed to fetch seasons');
   }
 }
 
@@ -69,11 +73,50 @@ export async function getEvents(sport: string = 'f1', seasonId: string): Promise
     const response = await api.get<Event[]>(`/sports/${sport}/seasons/${seasonId}/events`);
     return response.data;
   } catch (error: unknown) {
-    if (error instanceof AxiosError && error.response?.data) {
-      const apiError = error.response.data as ApiErrorResponse;
-      throw new Error(apiError.message || 'Failed to fetch events');
-    }
-    throw error;
+    throwApiError(error, 'Failed to fetch events');
+  }
+}
+
+export type SportCategory =
+  | 'football'
+  | 'basketball'
+  | 'f1'
+  | 'cycling'
+  | 'rugby'
+  | 'handball'
+  | 'athletics';
+
+export interface TimelineEvent {
+  id: string;
+  name: string;
+  date: string;
+  location?: string;
+  venue?: string;
+  category: SportCategory;
+  competition: string;
+  status: 'scheduled' | 'completed' | 'cancelled' | 'live';
+  homeTeam?: string;
+  awayTeam?: string;
+}
+
+export interface TimelineResponse {
+  events: TimelineEvent[];
+  from: string;
+  to: string;
+  fetchedAt: string;
+}
+
+/**
+ * Get upcoming events timeline across all sports
+ */
+export async function getTimeline(days = 60): Promise<TimelineResponse> {
+  try {
+    const response = await api.get<TimelineResponse>('/sports/timeline', {
+      params: { days },
+    });
+    return response.data;
+  } catch (error: unknown) {
+    throwApiError(error, 'Failed to fetch timeline');
   }
 }
 
@@ -85,10 +128,6 @@ export async function getRaceResults(sport: string = 'f1', eventId: string): Pro
     const response = await api.get<RaceResult[]>(`/sports/${sport}/events/${eventId}/results`);
     return response.data;
   } catch (error: unknown) {
-    if (error instanceof AxiosError && error.response?.data) {
-      const apiError = error.response.data as ApiErrorResponse;
-      throw new Error(apiError.message || 'Failed to fetch race results');
-    }
-    throw error;
+    throwApiError(error, 'Failed to fetch race results');
   }
 }

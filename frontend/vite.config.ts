@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -12,11 +12,11 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    // Optimized for WSL performance
+    strictPort: true,
     watch: {
       usePolling: true,
-      interval: 3000, // Increased to reduce CPU usage
-      ignored: ['**/node_modules/**', '**/dist/**'], // Ignore large directories
+      interval: 3000,
+      ignored: ['**/node_modules/**', '**/dist/**'],
     },
     hmr: {
       overlay: true,
